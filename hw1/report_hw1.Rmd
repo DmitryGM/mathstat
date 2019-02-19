@@ -1,0 +1,129 @@
+---
+title: "report_hw1"
+author: "Dmitry"
+date: "February 19, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Задача "6 и 13"
+
+```{r foo1, echo=TRUE}
+source("../sm1/useful_functions.R")
+
+my_sum <- function(x) {
+  options(digits=8)
+  cat(cat(round(c(mean(x), median(x), var2(x)), 1), sep=', '), '\n')
+}
+
+
+dat <- read.csv(
+  file = "13_6",
+  header = FALSE,
+  stringsAsFactors = FALSE,
+  sep = '\t'
+  )
+
+
+v6  <- unlist(dat[3])
+v13 <- unlist(dat[4])
+
+
+my_sum(v13)
+
+
+my_sum2 <- function(x) {
+  my_mean     <- mean(x)
+  my_kurtosis <- moments::kurtosis(x) - 3 # Коэффициент эксцесса
+  my_skewness <- moments::skewness(x)     # Коэффициент асимметрии
+  
+  cat(cat(round(c(my_mean, my_kurtosis, my_skewness), 2), sep=', '), '\n')
+}
+
+v_delta <- v13 - v6
+my_sum2(v_delta)
+
+
+
+hist(v13, col=rgb(0,1,1,1/2), main = 'Число покупателей в пятницу 13го')
+
+hist(v6,  col=rgb(0,1,1,1/2), main = 'Число покупателей в пятницу 6го')
+
+hist(v_delta, col=rgb(0,1,1,1/2), main = 'Разность числа покупателей')
+
+boxplot(v6, v13, names = c('6', '13'), xlab = 'Число покупателей')
+
+boxplot(v_delta, xlab = 'Разность числа покупателей')
+```
+
+Мы рассматриваем выборку разности числа покупателей потому, что хотим узнать на сколько отличается число покупателей 6го и 13го числа в разных магазинах.
+
+## Задача "Колледжи"
+
+```{r foo2, echo=TRUE}
+dat <- read.csv('colleges.txt', sep = '\t')
+
+
+dat1 <- subset(dat, School_Type == 'Univ')
+dat2 <- subset(dat, School_Type != 'Univ')
+
+# boxplots:
+boxplot(dat1$SAT, dat2$SAT, xlab = 'SAT', names = c('Univ', 'Lib Arts'))
+boxplot(dat1$Acceptance, dat2$Acceptance, xlab = 'Acceptance', names = c('Univ', 'Lib Arts'))
+boxplot(dat1$X..Student, dat2$X..Student, xlab = '$/Student', names = c('Univ', 'Lib Arts'))
+boxplot(dat1[['Top.10.']], dat2[['Top.10.']], xlab = 'Top 10%', names = c('Univ', 'Lib Arts'))
+boxplot(dat1[['X.PhD']], dat2[['X.PhD']], xlab = '%PhD', names = c('Univ', 'Lib Arts'))
+boxplot(dat1[['Grad.']], dat2[['Grad.']], xlab = 'Grad%', names = c('Univ', 'Lib Arts'))
+
+# hists:
+
+p1 <- hist(dat1[['SAT']], main = 'SAT (Univ)')
+p2 <- hist(dat2[['SAT']], main = 'SAT (Lib Arts)')
+plot( p1, col=rgb(0,0,1,1/4), main = 'SAT')
+plot( p2, col=rgb(1,0,0,1/4), add=T, main = 'SAT')
+
+p1 <- hist(dat1[['Acceptance']], main = 'Acceptance (Univ)')
+p2 <- hist(dat2[['Acceptance']], main = 'Acceptance (Lib Arts)')
+plot( p1, col=rgb(0,0,1,1/4), main = 'Acceptance')
+plot( p2, col=rgb(1,0,0,1/4), add=T, main = 'Acceptance')
+
+p1 <- hist(dat1[['X..Student']], main = '$/Student (Univ)')
+p2 <- hist(dat2[['X..Student']], main = '$/Student (Lib Arts)')
+plot( p1, col=rgb(0,0,1,1/4), main = '$/Student')
+plot( p2, col=rgb(1,0,0,1/4), add=T, main = '$/Student')
+
+p1 <- hist(dat1[['Top.10.']], main = 'Top 10% (Univ)')
+p2 <- hist(dat2[['Top.10.']], main = 'Top 10% (Lib Arts)')
+plot( p1, col=rgb(0,0,1,1/4), main = 'Top 10%')
+plot( p2, col=rgb(1,0,0,1/4), add=T)
+
+p1 <- hist(dat1[['X.PhD']], main = '%PhD (Univ)')
+p2 <- hist(dat2[['X.PhD']], main = '%PhD (Lib Arts)')
+plot( p1, col=rgb(0,0,1,1/4), main = '%PhD')
+plot( p2, col=rgb(1,0,0,1/4), add=T)
+
+p1 <- hist(dat1[['Grad.']], main = 'Grad% (Univ)')
+p2 <- hist(dat2[['Grad.']], main = 'Grad% (Lib Arts)')
+plot( p1, col=rgb(0,0,1,1/4), main = 'Grad%')
+plot( p2, col=rgb(1,0,0,1/4), add=T)
+
+
+# summary:
+options(digits=8)
+print(mean(dat2$SAT))
+print(quantile(dat1$Acceptance))
+print('Cal Tech', quote = FALSE)
+
+```
+
+### 3 гипотезы:
+
+1. В университеты поступить не сильно сложнее, чем в школы искусств
+
+2. В некоторых университетах сложнее доучиться до конца, чем в школах искуств
+
+3. В университеты в среднем поступают более сильные, уверенные в себе студенты, чем в школы искусств
+

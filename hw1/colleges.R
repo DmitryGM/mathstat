@@ -19,7 +19,7 @@ unlist(dat['Grad.'])
 boxplot(dat1$SAT, dat2$SAT)
 boxplot(dat1$Acceptance, dat2$Acceptance)
 boxplot(dat1$X..Student, dat2$X..Student)
-boxplot(unlist(dat1['Top.10.']), unlist(dat2['Top.10.']))
+boxplot(dat1[['Top.10.']], dat2[['Top.10.']])
 boxplot(unlist(dat1['X.PhD']), unlist(dat2['X.PhD']))
 boxplot(unlist(dat1['Grad.']), unlist(dat2['Grad.']))
 
