@@ -1,0 +1,173 @@
+---
+title: "Семинар 1"
+author: "Dmitry"
+date: "February 17, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Задание 1
+###Листинг файла useful_functions.R
+```{r foo1, echo=TRUE}
+library("moments", lib.loc="~/R/x86_64-pc-linux-gnu-library/3.4")
+
+
+var2 <- function(v) {
+  # Выборочная дисперсия (Population variance)
+  # (НЕ исправленная дисперсия)
+  N <- length(v)
+  return(var(v) * (N-1)/N)
+}
+
+my_summary <- function(v) {
+  my_min       <- min(v)
+  my_max       <- max(v)
+  my_mean      <- mean(v)
+  my_median    <- median(v)
+  
+  my_q1        <- quantile(v, 0.25)
+  my_q3        <- quantile(v, 0.75)
+  
+  # Исправленная выборочная дисперсия
+  my_var <- var(v)
+  
+  # Выборочная дисперсия
+  my_var2 <- var2(v)
+  
+  # Выборочное исправленное стандартное отклонение
+  my_sd = sd(v)
+  
+  # Коэффициент вариации
+  # (Coefficient of variation)
+  my_cv = my_sd / my_mean
+  
+  # Коэффициент асимметрии
+  # my_gamma1 = moment(v, order=3, center=TRUE) / my_sd ^ 3
+  my_skewness = moments::skewness(v)
+  
+  # Коэффициент эксцесса
+  # my_gamma2 = moment(v, order=4, center=TRUE) / my_sd^4 - 3
+  my_kurtosis = moments::kurtosis(v) - 3
+  
+  return(c(
+    my_min,
+    my_max,
+    my_mean,
+    my_var,
+    my_var2,
+    my_sd,
+    my_median,
+    my_q1,
+    my_q3,
+    my_cv,
+    my_skewness,
+    my_kurtosis))
+}
+```
+
+###Далее по заданию:
+```{r foo, echo=TRUE}
+source("useful_functions.R")
+
+sample_size = 100500
+
+
+sample_norm <- rnorm(sample_size, mean = 2, sd = 2)
+sample_exp  <- rexp(sample_size,rate=0.5)
+sample_unif <- runif(sample_size, min=-2, max=6)
+sample_pois <- rpois(sample_size, lambda = 2) # mean == lambda
+
+
+vars_norm = my_summary(sample_norm)
+vars_exp  = my_summary(sample_exp)
+vars_unif = my_summary(sample_unif)
+vars_pois = my_summary(sample_pois)
+
+vars = data.frame(cbind(vars_norm,vars_exp,vars_unif,vars_pois))
+names(vars) = c('Normal','Exponential','Uniform','My Sample')
+rownames(vars) = c('min:','max:','mean:','corrected var:', 'not corrected var:  ', 'sd:','median:', 'q1:', 'q3:', 'Variation coef:','Skewness:', 'Kurtosis:')
+
+print(round(vars,2))
+
+
+
+
+mycolors = c(rgb(1,0,0,1/2),rgb(0,1,0,1/2),col=rgb(0,0,1,1/2),col=rgb(1,0,1,1/2))
+xlim_a = min(min(sample_norm),min(vars_pois),min(sample_unif),min(sample_exp))
+xlim_b = max(max(sample_norm),max(vars_pois),max(sample_unif),max(sample_exp))
+
+hist(sample_norm, freq = F,col=mycolors[1],xlim = c(xlim_a,xlim_b), ylim = c(0,1),main = ' ', xlab = 'X')
+hist(sample_exp,freq = F,col=mycolors[2], add=T)
+legend("topright", inset=.02, title="Distributions",
+       c("norm","exp"), fill=mycolors[1:2], horiz=F, cex=0.8)
+
+
+hist(sample_unif,freq=F,col=mycolors[3],xlim = c(xlim_a,xlim_b), ylim = c(0,1),main = ' ', xlab = 'X')
+hist(sample_pois,freq=F,col=mycolors[4], add=T)
+legend("topright", inset=.02, title="Distributions",
+       c("unif","mysample"), fill=mycolors[3:4], horiz=F, cex=0.8)
+
+
+boxplot(sample_norm,sample_exp, sample_unif,sample_pois, names = c('norm','exp','unif','mysample'))
+
+
+
+```
+
+### Ответы на вопросы:
+
+A: Приведите два примера конкретных задач, где помогла бы описательная статистика
+
+Q:
+
+Пример 1. Гомеопаты выкатили новое лекарство "гомеовокс", основанное сильно разведённом аконитум напеллюсе. Задача статистики будет состоять в провери гипотизы о том, что лекарство действует.
+
+Пример 2. Нужно выявить закономерности в судопроизводстве. Например, сравнить долю оправдательных приговоров, когда:
+
+* мужчина судит мужчину
+* мужчина судит женщину
+* женщина судит женщину
+* женщина судит мужчину
+
+## Задание 2
+```{r foo2, echo=TRUE}
+source("useful_functions.R")
+
+#1 generate vector of normal
+sample1<- rnorm(60, mean = 0, sd = 1)
+sample2<- rnorm(80, mean = 4, sd = 0.5)
+
+
+#combine them
+sample<- append(sample1, sample2 )
+
+vars = data.frame(my_summary(sample))
+rownames(vars) = c('min:','max:','mean:','corrected var:', 'not corrected var:  ', 'sd:','median:', 'q1:', 'q3:', 'Variation coef:','Skewness:', 'Kurtosis:')
+
+print(round(vars,2))
+
+
+
+h1 = hist(sample, col=rgb(1,0,0,1/2))
+lines(h1$mids, h1$counts)
+rug(sample)
+
+
+plot(ecdf(sample), main = "Empirical Cumulative Distribution Function")
+```
+
+### Ответы на вопросы:
+
+Q1. Что значит “плато” на графике эмпирической функции распределения?
+
+A1. Это значит, что в данном отерзке нет (или почти нет) точек. Стоит задуматься. Может распределение -- это сумма двух других распределений?
+
+
+Q2. От чего зависит скорость роста графика? (увеличение значения по оси y)
+
+A2. От плотности точек.
+
+
