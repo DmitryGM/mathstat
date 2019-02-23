@@ -1,0 +1,196 @@
+---
+title: "Seminar 2"
+author: "Dmitry"
+date: "February 23, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Задание 1
+
+```{r foo1, echo=TRUE}
+source('./../sm1/useful_functions.R') # Для неисправленной дисперсии
+
+var_count <- function(N, COUNT) {
+
+#N, COUNT <- 30, 1000
+#N, COUNT <- 1000, 1000
+
+vars = 1:N           # Дисперсия
+corrected_vars = 1:N # Исправленная дисперсия
+  
+  
+for (i in 1:COUNT) {
+  sample_norm <- rnorm(N, mean = 0, sd = 1)
+  
+  corrected_vars[i]  <- var(sample_norm)
+  vars[i]            <- var2(sample_norm)
+}
+
+
+my_mean_corrected_vars  <- mean(corrected_vars)
+my_mean_vars <- mean(vars)
+  
+boxplot(vars, corrected_vars, names = c('not corrected','corrected'), main=paste('N =', N, sep = ' '))
+abline(h = my_mean_vars, col = 'red')
+abline(h = my_mean_corrected_vars, col = "green")
+abline(h = 1, col = "blue")
+
+legend("topright", inset=.02, title="Dispersions",
+       c("mean of not corrected",
+         "mean of corrected",
+         "theoretical value"),
+       fill=c('red', 'green', 'blue'), horiz=FALSE, cex=0.8)
+
+# density:
+
+# 1)
+sample_norm_1 <- rnorm(N, mean = 0, sd = 1)
+sample_norm_2 <- rnorm(N, mean = 0, sd = my_mean_vars)
+sample_norm_3 <- rnorm(N, mean = 0, sd = my_mean_corrected_vars)
+
+
+xseq           <- seq(-4,4,.01)
+densities_1    <- dnorm(xseq, mean=0, sd=1)
+densities_2    <- dnorm(xseq, mean=0, sd=sqrt(my_mean_vars))
+densities_3    <- dnorm(xseq, mean=0, sd=sqrt(my_mean_corrected_vars))
+
+
+par(mfrow=c(1, 1), mar=c(3,4,4,2))
+
+
+
+plot(x=xseq,
+     y=densities_1,
+     col="blue",
+     xlab="",
+     ylab="Density",
+     type="l",
+     lwd=2,
+     cex=2,
+     main=paste('N =', N, sep = ' '),
+     cex.axis=.8
+     )
+legend("topright", inset=.02, title="Dispersions",
+       c("with sd = theoretical value",
+         "with sd = sqrt(mean of not corrected)",
+         "with sd = sqrt(mean of corrected)"),
+       fill=c('blue', 'red', 'green'), horiz=FALSE, cex=0.8)
+
+lines(x=xseq,
+      y=densities_2,
+      type="l",
+      lwd=2,
+      col="red")
+
+lines(x=xseq,
+      y=densities_3,
+      type="l",
+      lwd=2,
+      col="green")
+}
+
+var_count(30, 1000)
+var_count(1000, 1000)
+
+```
+
+###Ответы на вопросы:
+
+Q1: Чем отличаются исправленная выборочная и выборочная дисперсии?
+
+A1: Исправленная выборочная дисперсия, в отличие от неисправной является несмещенной. Однако обе эти дисперсии асимптотически несмещенны, что видно про большом объеме выборки.
+
+Q2: Что происходит при увеличении объема выборки?
+
+A2: Исправленная и неисправленная дисперсии приближаются к истинной (теоретической) дисперсии генеральной совокупности.
+
+
+##Задание 2
+
+
+```{r foo2, echo=TRUE}
+COUNT <- 1000
+
+median_ok <- function(N) {
+  means   <- 1:COUNT
+  medians <- 1:COUNT
+  
+  
+  for (i in 1:COUNT) {
+    sample_norm <- rnorm(N, mean = 0, sd = 1)
+    
+    means[i]  <- mean(sample_norm)
+    medians[i] <- median(sample_norm)
+  }
+  
+  boxplot(medians, means, names=c('median', 'mean'), main=paste('N =', N, sep = ' '))
+  abline(h = 0, col = 'green', lwd=2)
+}
+
+median_ok(30)
+median_ok(1000)
+
+```
+
+###Ответы на вопросы:
+
+
+Q1: Можно ли использовать выборочную медиану в качестве оценки мат. ожидания для нормального распределения? Почему?
+
+A1: Можно, если объем выборки достаточно большой, но зачем, если среднее имеет меньший разброс?
+
+Q2: Если выбирать между выборочной медианой и выборочным средним для оценки мат. ожидания нормального распределения, то какую следует выбрать? Почему?
+
+A: Выборочное среднее, т.к. оно имеет меньший разброс.
+
+
+##Задание 3
+
+```{r foo3, echo=TRUE}
+
+COUNT <- 1000
+
+mean_N    <- 1:COUNT
+median_N  <- 1:COUNT
+
+mean_N005 <- 1:COUNT
+mean_N010 <- 1:COUNT
+
+N <- 1000
+n <- 10
+
+# Sample:
+sample_norm_1 <- rnorm(N, mean = 1, sd = 1)
+sample_norm_2 <- rnorm(n, mean = 20, sd = 1)
+
+sample_norm <- c(sample_norm_1, sample_norm_2)
+hist(x = sample_norm, col = 'lightblue', main = 'Sample')
+  
+
+  
+for (i in 1:COUNT) {
+  sample_norm_1 <- rnorm(N, mean = 1, sd = 1)
+  sample_norm_2 <- rnorm(n, mean = 20, sd = 1)
+  
+  sample_norm <- c(sample_norm_1, sample_norm_2)
+  
+  mean_N[i] <- mean(sample_norm)
+  median_N[i] <- median(sample_norm)
+  mean_N005[i] <- mean(sample_norm, trim = 0.05)
+  mean_N010[i] <- median(sample_norm, trim = 0.10)
+}
+
+boxplot(median_N, mean_N, mean_N005, mean_N010, names = c('median', 'mean', 'mean -5%', 'mean -10%'))
+abline(h = 1, col = 'green', lwd=2)
+
+```
+
+###Ответы на вопросы:
+
+Q: На какую из оценок мат. ожидания выбросы влияют больше всего? На какую меньше?
+
+A: Больше всего выбросы влияют на стренее. Меньше на усеченное среднее и медиану.
